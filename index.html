@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <title>COUNTEREXAMPLE TO EULER'S CONJECTURE ON SUMS OF LIKE POWERS</title>
+    <script src="./coi-serviceworker.js"></script>
 </head>
 
 <body>
@@ -20,7 +21,8 @@
                     <p>&nbsp; &nbsp; &nbsp; A direct search up to
                         <input onkeypress="clickPress(event)" id="end" size=4 placeholder=200>
                         in your Web Browser
-                        <button id="yields">yields</button>
+                        <button id="yield-multi" disabled="true">run multithreaded</button>
+                        <button id="yield-single" disabled="true">run singlethreaded</button>
                     <div style="text-align:center" id="result">...</div>
                     <p>as the smallest instances in which four fifth powers sum to a fifth power. This
                         is a counterexample(s) to a conjecture by Euler[1] that at least <em>n</em> <em>n</em>th powers
@@ -53,43 +55,7 @@
 
 
 
-    <script type="module">
-        import init, { greet, search } from "./pkg/fifth.js";
-        init()
-            .then(() => {
-                // alert(search(20));
-                // greet("WebAssembly")
-                //alert("Error: Must be a positive integer")
-            });
-
-        function fifths() {
-            var end_string = document.getElementById('end').value
-            if (end_string == "") { end_string = "200"; }
-            var end = parseInt(end_string);
-
-            if (isNaN(end) || end <= 0) {
-                alert("Error: Must be a positive integer");
-                return;
-            }
-
-            var start_time = performance.now();
-            // document.getElementById('result').innerHTML = "<em>working</em>";
-            // document.location.reload(false);
-            var result = search(end);
-            var delta = performance.now() - start_time;
-            document.getElementById('result').innerHTML = result + "<p><em>elapsed time: " + (delta / 1000.0).toFixed(2) + " seconds</em></p>";
-        }
-
-        function clickPress(event) {
-            if (event.keyCode == 13) {
-                fifths();
-            }
-        }
-
-
-        document.getElementById('yields').addEventListener('click', fifths);
-        document.getElementById('end').addEventListener('keyup', clickPress);
-
+    <script src="dist/index.js">
     </script>
 
 </body>

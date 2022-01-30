@@ -1,7 +1,15 @@
-use std::{collections::HashSet, u128};
+#![feature(format_args_capture)]
+use std::{collections::HashSet, u128, ops::Range};
 extern crate time;
-use rayon::iter::IntoParallelIterator;
+
+#[cfg(feature = "parallel")]
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
+
+#[cfg(feature = "parallel")]
 use rayon::prelude::*;
+
+#[cfg(feature = "parallel")]
+pub use wasm_bindgen_rayon::init_thread_pool;
 
 // !!!cmk run parallel
 //      see https://rustwasm.github.io/docs/wasm-bindgen/examples/raytrace.html?highlight=panic#building-the-demo
@@ -29,6 +37,16 @@ pub fn greet(name: &str) {
     alert(&format!("Hello, {}!", name));
 }
 
+#[cfg(feature = "parallel")]
+fn it_range(r: Range<usize>) -> impl 'static + ParallelIterator<Item = usize> {
+    r.into_par_iter()
+}
+
+#[cfg(not(feature = "parallel"))]
+fn it_range(r: Range<usize>) -> impl 'static + Iterator<Item = usize> {
+    r.into_iter()
+}
+
 #[wasm_bindgen]
 pub fn search(end: usize) -> String {
     // table.len < ((end-1)<sup>5</sup>*4)^(1/5) = (end-1)*4^(1/5) < (end-1)*1.32
@@ -41,8 +59,9 @@ pub fn search(end: usize) -> String {
         fifth.push(value);
     }
 
-    let count: String = (4..end)
-        //.into_par_iter()
+    let count: String = 
+        it_range(4..end)
+        //.par_iter()
         .map(|n4| {
             let mut subcount: Vec<String> = vec![];
             let mut sum = fifth[n4];
@@ -75,12 +94,12 @@ pub fn search(end: usize) -> String {
             }
             subcount
         })
-        .flatten()
+    .flatten()
         .collect::<Vec<String>>().join("");
 
     // println!("{} found in {:?} seconds.", count, start.elapsed());
-    return count; //format!("{}", count);
-                  //     "{count}<p><em>elapsed time: </em></p>", //{time:?}
+    count //format!("{}", count);
+          //     "{count}<p><em>elapsed time: </em></p>", //{time:?}
 
     // );
 
